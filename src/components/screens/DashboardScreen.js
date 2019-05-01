@@ -38,7 +38,11 @@ class DashboardScreen extends Component {
     header: null
   }
 
-  static detax = 0;
+  static deltaX = 0;
+  static LIMIT_INDICATORS_WIDTH = 1510;
+  static DELAY_INDICATORS_INTERVAL = 50;
+  static DELAY_INDICATORS_TIMEOUT_END = 2000;
+  static SCROLL_OFFSET_VARIANT = 2;
 
   constructor(props){
     super(props)
@@ -66,10 +70,16 @@ class DashboardScreen extends Component {
     }
 
     this.handleInputChange = this.handleInputChange.bind(this)
+    this._interval = null;
   }
 
   componentWillMount(){
     this.centrarMapa()
+  }
+
+  componentWillUnmount() {
+    clearIntervalEventView();
+    DashboardScreen.deltaX = 0;
   }
 
   centrarMapa(){
@@ -509,27 +519,52 @@ function Search(props){
   )
 }
 
-function InitScrollEvent(){
-  setInterval(() => {
-    DashboardScreen.detax = DashboardScreen.detax + 100;
-    this._scroll.scrollTo({ x: DashboardScreen.detax, animated: true });
-  }, 5000);
+/**
+ * Clear Interval 
+ * @constructor
+ */
+function clearIntervalEventView(){
+  if(this._interval != null){
+    clearInterval(this._interval);
+  }
 }
 
+/**
+ * init Scroll Event on Component
+ * @constructor
+ */
+function InitScrollEvent(){
+  clearIntervalEventView();
+  this._interval = setInterval(() => {
+    DashboardScreen.deltaX = DashboardScreen.deltaX + DashboardScreen.SCROLL_OFFSET_VARIANT;
+    this._scroll.scrollTo({ x: DashboardScreen.deltaX, animated: true });
+  }, DashboardScreen.DELAY_INDICATORS_INTERVAL);
+}
+
+/**
+ * Reset indicators Event on finish scroll
+ * @constructor
+ * @param {event} event - Current Event
+ */
 function resetIndicadoresScrollEvent(event){
     const { width }               = Dimensions.get('window'),
           scrollOffsetX           = event.nativeEvent.contentOffset.x;
-    if( scrollOffsetX + width >= 1000 ){
-      DashboardScreen.detax = 0;
-      this._scroll.scrollTo({ x: 0, animated: true });
+    if( scrollOffsetX + width >= DashboardScreen.LIMIT_INDICATORS_WIDTH ){
+      DashboardScreen.deltaX = 0;
+      clearIntervalEventView();
+      setTimeout(() => {
+        this._scroll.scrollTo({ x: 0, animated: true });
+        InitScrollEvent();
+      },DashboardScreen.DELAY_INDICATORS_TIMEOUT_END);
     }
 }
 
-function onLayoutIndicadoresScrollView(event){
-  let {width, height} = event.nativeEvent.layout
-  console.log("heights", height);
-  console.log("widths", width);
-}
+/**
+ * get ScrollView Dimen
+ */
+onContentSizeChange = (contentWidth, contentHeight) => {
+  DashboardScreen.LIMIT_INDICATORS_WIDTH = contentWidth - 1;
+};
 
 function Indicadores(props) {
   let indicador = props.indicador
@@ -538,9 +573,10 @@ function Indicadores(props) {
   return (
       <View style={{flex: 0.1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
         <ScrollView
+          scrollEnabled={false}
           ref={(scroll) => {this._scroll=scroll;InitScrollEvent();}}
           onScroll={event=>{resetIndicadoresScrollEvent(event)}}
-          onLayout={event=>{onLayoutIndicadoresScrollView(event)}}
+          onContentSizeChange={this.onContentSizeChange}
           horizontal={true} style={{flex: 1}} showsHorizontalScrollIndicator={false}>
           <View style={styles.indicadorGlobal}>
             <Image style={styles.indicadorGlobalIcono} source={getIndicadorImg(0, codigoCategoria)} resizeMode="contain" />

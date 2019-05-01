@@ -7,9 +7,9 @@ import com.android.build.OutputFile
  * and bundleReleaseJsAndAssets).
  * These basically call `react-native bundle` with the correct arguments during the Android build
  * cycle. By default, bundleDebugJsAndAssets is skipped, as in debug/dev mode we prefer to load the
- * bundle directly from the development server. Below you can see all the possible configurations
- * and their defaults. If you decide to add a configuration block, make sure to add it before the
- * `apply from: "../../node_modules/react-native/react.gradle"` line.
+ * bundle defaults. If you decide to add a configuration block, make sure to add it before the
+ *  * `apply from: "../../noddirectly from the development server. Below you can see all the possible configurations
+ * and their e_modules/react-native/react.gradle"` line.
  *
  * project.ext.react = [
  *   // the name of the generated asset file containing your JS bundle
@@ -105,8 +105,8 @@ android {
         applicationId "com.somosue"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 100004
-        versionName "100004"
+        versionCode 100006
+        versionName "100006"
     }
     splits {
         abi {
